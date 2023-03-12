@@ -1,0 +1,6 @@
+gomplate
+terraform
+aws-cli
+argc
+jq
+vault

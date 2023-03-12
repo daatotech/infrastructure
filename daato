@@ -1,0 +1,104 @@
+#! /usr/bin/env bash
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+DAATO_REPO="git@github.com:daatotech/core.git"
+export VAULT_ADDR="https://vault-public-vault-667e5c79.bd5844f2.z1.hashicorp.cloud:8200"
+export VAULT_NAMESPACE=admin
+
+# @describe daato infrastructure tools
+
+# @cmd modify global infrastructure
+# @flag -d --destroy destroy the infrastructure
+global() {
+  pushd ${SCRIPT_DIR}/stacks/global > /dev/null
+  if [ "${argc_destroy}" ]; then
+    echo "destroying the ${argc_stack} stack..."
+    terraform destroy
+  else
+    echo "creating/updating the ${argc_stack} stack..."
+    terraform init
+    terraform apply -auto-approve
+  fi
+  popd > /dev/null
+}
+
+# @cmd create or update the infrastructure
+# @arg instance instance identifier (file name from instances/<instance>.json)
+# @flag -d --destroy destroy the infrastructure
+# @flag -b --build build and push docker images
+setup() {
+  pushd ${SCRIPT_DIR}/stacks/setup > /dev/null
+  terraform workspace new ${argc_instance}
+  terraform workspace select ${argc_instance}
+  if [ "${argc_destroy}" ]; then
+    echo "destroying the ${argc_instance} stack..."
+    terraform destroy -var instance_identifier=${argc_instance}
+  else
+    echo "creating/updating the ${argc_instance} stack..."
+    terraform init -backend-config key=${argc_instance}.tfstate
+    terraform apply -auto-approve -var instance_identifier=${argc_instance}
+    if [ "${argc_build}" ]; then
+			${SCRIPT_DIR}/daato build ${argc_instance} --app=api
+			${SCRIPT_DIR}/daato build ${argc_instance} --app=frontend
+		fi
+  fi
+  popd > /dev/null
+}
+
+# @cmd create or update the infrastructure
+# @arg instance instance identifier (file name from instances/<instance>.json)
+# @flag -d --destroy destroy the infrastructure
+instance() {
+  pushd ${SCRIPT_DIR}/stacks/instance > /dev/null
+  terraform workspace new ${argc_instance}
+  terraform workspace select ${argc_instance}
+  if [ "${argc_destroy}" ]; then
+    echo "destroying the ${argc_instance} stack..."
+    terraform destroy -var instance_identifier=${argc_instance}
+    aws secretsmanager delete-secret --force-delete-without-recovery --secret-id daato-acr-credentials --output table --no-cli-pager
+  else
+    echo "creating/updating the ${argc_instance} stack..."
+    terraform init
+    terraform apply -auto-approve -var instance_identifier=${argc_instance}
+  fi
+  popd > /dev/null
+}
+
+# @cmd build the docker image
+# @arg instance instance identifier (file name from instances/<identifier>.json)
+# @option -a --app[=api|frontend|core] which app to build
+build() {
+  identifier=$(cat ${SCRIPT_DIR}/instances/${argc_instance}.json | jq .identifier -r)
+  echo "building ${argc_app} image for ${identifier}..."
+  output_dir="${SCRIPT_DIR}/deployments/${identifier}/image"
+  mkdir -p ${output_dir}
+  cd ${output_dir}
+  repo_dir=${output_dir}/repo
+  if [ -d "${repo_dir}" ]; then
+    git -C ${repo_dir} pull origin
+  else
+    git clone ${DAATO_REPO} ${repo_dir}
+  fi
+  pushd ${repo_dir} > /dev/null
+  yarn install --frozen-lockfile
+  if [ "${argc_app}" == "frontend" ]; then
+    vault kv get -format=json secret/instances/${identifier}/auth0 | jq .data.data > ${output_dir}/auth0.json
+    vault kv get -format=json secret/global/auth0 | jq .data.data > ${output_dir}/global-auth0.json
+    vault kv get -format=json secret/global/api-keys | jq .data.data > ${output_dir}/api-keys.json
+    gomplate \
+      --input-dir ${SCRIPT_DIR}/templates/frontend \
+      --output-dir ${output_dir} \
+      --context auth0=${output_dir}/auth0.json \
+      --context global_auth0=${output_dir}/global-auth0.json \
+      --context api_keys=${output_dir}/api-keys.json
+    cp ${output_dir}/.env ${repo_dir}/apps/frontend
+    yarn nx run frontend:build:production --skip-nx-cache
+  elif [ "${argc_app}" == "api" ]; then
+    yarn nx run api:build --skip-nx-cache
+  fi
+  docker buildx build --platform=linux/amd64 -t daato.azurecr.io/${argc_app}:${identifier} -f ./apps/${argc_app}/Dockerfile .
+  az acr login -n daato --subscription common
+  docker push daato.azurecr.io/${argc_app}:${identifier}
+  popd > /dev/null
+}
+
+eval $(argc "$0" "$@")

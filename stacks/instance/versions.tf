@@ -1,0 +1,12 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.57.1"
+    }
+    vault = {
+      source  = "hashicorp/vault"
+      version = "~> 3.13.0"
+    }
+  }
+}
