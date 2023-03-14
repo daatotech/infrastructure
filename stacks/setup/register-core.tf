@@ -18,6 +18,7 @@ locals {
 }
 data "http" "core_token" {
   method          = "POST"
+  //noinspection HILUnresolvedReference
   url             = "https://${local.auth0_config.domain}/oauth/token"
   request_headers = {
     "Content-Type" = "application/json"
