@@ -55,9 +55,15 @@ locals {
       "create:subsidiary",
       "update:subsidiary",
       "delete:subsidiary",
-      "manage:subsidiaries"
+      "manage:subsidiaries",
+      "role:contributor",
+      "role:isolated-contributor",
+      "role:group-manager",
+      "role:subsidiary-manager",
+      "role:admin"
     ]
     contributor = [
+      "role:contributor",
       "accept:request",
       "create:contributor",
       "create:request",
@@ -84,19 +90,21 @@ locals {
       "update:request"
     ]
     group_manager = [
+      "role:group-manager",
       "create:contributor",
       "create:subsidiary",
       "delete:subsidiary",
       "list:contributors",
       "list:subsidiaries",
       "manage:subsidiaries",
-      "update:subsidiary"
+      "update:subsidiary",
+      "update:dataPoint"
     ]
     subsidiary_manager = [
-      "create:external-contributor",
+      "role:subsidiary-manager",
+      "create:contributor",
       "list:contributors",
       "list:discoveredUsers",
-      "list:external-contributors",
       "list:reports",
       "list:requests",
       "list:suppliers",
@@ -113,6 +121,7 @@ locals {
       "delete:request"
     ]
     admin = [
+      "role:admin",
       "read:report",
       "list:reports",
       "read:reportPage",

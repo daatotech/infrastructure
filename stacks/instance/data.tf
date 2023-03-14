@@ -33,6 +33,7 @@ locals {
   api_env                            = {
     DB_URL                             = "mongodb://daato:${random_password.db.result}@${aws_docdb_cluster.this.endpoint}:27017?replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false"
     JWT_AUDIENCE                       = local.auth0.resource_servers.api
+    ENV_NAME                           = local.identifier
     AUTH0_DOMAIN                       = local.auth0.domain
     AUTH0_MANAGEMENT_CLIENT_ID         = local.auth0.clients.management.client_id
     AUTH0_MANAGEMENT_CLIENT_SECRET     = local.auth0.clients.management.client_secret
