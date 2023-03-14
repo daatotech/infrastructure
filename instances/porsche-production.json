@@ -4,6 +4,6 @@
   "subdomain": "porsche",
   "domain": "aws.daato.work",
   "logo_url": "https://cdn.ui.porsche.com/porsche-design-system/marque/porsche-marque-trademark.medium.min.fff6e9b91481cc5b1fc6c9b62987ccaf@2x.webp",
-  "core_api_identifier": "https://core.daato.dev",
-  "core_api_url": "https://daato-core-dev.azurewebsites.net"
+  "core_api_identifier": "https://prod.core.daato.io",
+  "core_api_url": "https://daato-core-prod.azurewebsites.net"
 }

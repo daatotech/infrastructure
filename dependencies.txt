@@ -1,6 +1,6 @@
-gomplate
+gomplate (only for daato)
 terraform
-aws-cli
+aws-cli (only for aws)
 argc
 jq
 vault

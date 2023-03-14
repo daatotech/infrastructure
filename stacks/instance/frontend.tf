@@ -2,7 +2,7 @@ resource "aws_cloudwatch_log_group" "frontend" {
   name = "${local.identifier}-frontend"
 }
 resource "aws_ecs_task_definition" "frontend" {
-  family                   = local.identifier
+  family                   = "${local.identifier}-ui"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = 1024

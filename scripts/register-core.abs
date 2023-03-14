@@ -1,0 +1,34 @@
+instance = args()[2]
+echo('retrieving configuration for ${instance}...')
+auth0 = `vault kv get -format json secret/instances/${instance}/auth0`.json().data.data
+config = `vault kv get -format json secret/instances/${instance}/config`.json().data.data
+
+identifier = config.identifier
+core_api_url = config.core_api_url
+auth0_domain = auth0.domain
+core_client_id = auth0.clients.core.client_id
+core_client_secret = auth0.clients.core.client_secret
+core_audience = auth0.resource_servers.core
+api_url = auth0.resource_servers.api
+
+echo('registering ${identifier} with core at ${core_api_url}')
+
+core_token = `
+  http post https://${auth0_domain}/oauth/token \
+    grant_type=client_credentials \
+    client_id=${core_client_id} \
+    client_secret=${core_client_secret} \
+    audience=${core_audience}
+`.json().access_token
+
+backends = `http get ${core_api_url}/v1/backend/all -A bearer -a ${core_token}`.json()
+instance_backend = backends.find(f(backend) {
+  backend.url == api_url
+})
+if instance_backend {
+  instance_backend_id = instance_backend.id
+  echo('found a backend registered for ${api_url} with id ${instance_backend_id}')
+}
+else {
+
+}

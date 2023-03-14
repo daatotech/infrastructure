@@ -2,7 +2,7 @@ resource "aws_cloudwatch_log_group" "api" {
   name = "${local.identifier}-api"
 }
 resource "aws_ecs_task_definition" "api" {
-  family                   = local.identifier
+  family                   = "${local.identifier}-api"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = 1024

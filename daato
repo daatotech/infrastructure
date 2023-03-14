@@ -48,6 +48,9 @@ setup() {
 # @arg instance instance identifier (file name from instances/<instance>.json)
 # @flag -d --destroy destroy the infrastructure
 instance() {
+	read -p "vault username: " VAULT_USERNAME
+	read -p "vault password: " VAULT_PASSWORD
+	vault login -method=userpass username=${VAULT_USERNAME} password=${VAULT_PASSWORD}
   pushd ${SCRIPT_DIR}/stacks/instance > /dev/null
   terraform workspace new ${argc_instance}
   terraform workspace select ${argc_instance}
@@ -99,6 +102,13 @@ build() {
   az acr login -n daato --subscription common
   docker push daato.azurecr.io/${argc_app}:${identifier}
   popd > /dev/null
+}
+
+# @cmd register the instance with core
+# @arg instance instance identifier (file name from instances/<identifier>.json)
+core() {
+	instance=${argc_instance}
+	abs ${SCRIPT_DIR}/scripts/register-core.abs ${instance}
 }
 
 eval $(argc "$0" "$@")
