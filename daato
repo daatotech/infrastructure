@@ -48,8 +48,10 @@ setup() {
 # @arg instance instance identifier (file name from instances/<instance>.json)
 # @flag -d --destroy destroy the infrastructure
 instance() {
+	export VAULT_ADDR="https://vault-public-vault-667e5c79.bd5844f2.z1.hashicorp.cloud:8200"
 	read -p "vault username: " VAULT_USERNAME
-	read -p "vault password: " VAULT_PASSWORD
+	IFS= read -r -s -p 'vault password: ' VAULT_PASSWORD
+	echo
 	vault login -method=userpass username=${VAULT_USERNAME} password=${VAULT_PASSWORD}
   pushd ${SCRIPT_DIR}/stacks/instance > /dev/null
   terraform workspace new ${argc_instance}
