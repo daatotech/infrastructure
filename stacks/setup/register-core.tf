@@ -1,7 +1,7 @@
 locals {
   backend_payload = {
     name          = "${local.identifier}-api"
-    url           = "https://api.${local.subdomain}.${local.aws_zone}"
+    url           = "https://api.${local.aws_zone}"
     auth0ClientId = module.auth0.clients.core.client_id
   }
   client_payload = {

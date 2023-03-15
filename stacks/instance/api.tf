@@ -44,7 +44,7 @@ resource "aws_lb_target_group" "api" {
   target_type = "ip"
   vpc_id      = module.vpc.vpc_id
   health_check {
-    path = "/organization/orgIDFromDomain/${local.subdomain}"
+    path = "/organization/orgIDFromDomain/${split(local.aws_zone, ".")[0]}"
   }
 }
 resource "aws_alb_listener_rule" "api" {
@@ -55,7 +55,7 @@ resource "aws_alb_listener_rule" "api" {
   }
   condition {
     host_header {
-      values = ["api.${local.subdomain}.${local.aws_zone}"]
+      values = ["api.${local.aws_zone}"]
     }
   }
 }

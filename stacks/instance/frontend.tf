@@ -54,7 +54,7 @@ resource "aws_alb_listener_rule" "frontend" {
   }
   condition {
     host_header {
-      values = ["${local.subdomain}.${local.aws_zone}"]
+      values = [local.aws_zone]
     }
   }
 }

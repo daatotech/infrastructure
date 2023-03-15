@@ -21,7 +21,6 @@ locals {
   blob_storage                       = jsondecode(data.vault_generic_secret.blob_storage.data_json)
   auth0                              = jsondecode(data.vault_generic_secret.auth0.data_json)
   identifier                         = local.instance_config.identifier
-  subdomain                          = local.instance_config.subdomain
   aws_zone                           = local.instance_config.domain
   logo_url                           = local.instance_config.logo_url
   core_api_identifier                = local.instance_config.core_api_identifier
@@ -47,7 +46,7 @@ locals {
     CORE_AUTH0_M2M_CLIENT_ID           = local.auth0.clients.core.client_id
     CORE_AUTH0_M2M_CLIENT_SECRET       = local.auth0.clients.core.client_secret
     CORE_AUTH0_M2M_AUDIENCE            = local.auth0.resource_servers.core
-    FRONTEND_URL                       = "https://${local.subdomain}.${local.aws_zone}"
+    FRONTEND_URL                       = "https://${local.aws_zone}"
     PUBLIC_CONTAINER_CONNECTION_STRING = local.public_container_connection_string
     SENDGRID_TOKEN                     = local.sendgrid_token
     SINGLE_ORG                         = "true"

@@ -1,10 +1,10 @@
 module "auth0" {
   source              = "../../modules/auth0"
-  api_host            = "api.${local.subdomain}.${local.aws_zone}"
+  api_host            = "api.${local.aws_zone}"
   core_api_identifier = local.core_api_identifier
   logo_url            = local.logo_url
   prefix              = local.identifier
-  ui_host             = "${local.subdomain}.${local.aws_zone}"
+  ui_host             = local.aws_zone
 }
 resource "vault_generic_secret" "config" {
   data_json = jsonencode(local.instance_config)

@@ -63,21 +63,8 @@ resource "aws_lb_listener" "https" {
   }
 }
 
-
-#resource "aws_lb_target_group" "frontend" {
-#  name        = "${local.identifier}-frontend"
-#  port        = var.frontend_port
-#  protocol    = "HTTP"
-#  target_type = "ip"
-#  vpc_id      = module.vpc.vpc_id
-#  health_check {
-#    path = "/"
-#  }
-#}
-
-
 resource "aws_route53_record" "frontend" {
-  name    = "${local.subdomain}.${local.aws_zone}"
+  name    = local.aws_zone
   type    = "A"
   zone_id = data.aws_route53_zone.this.zone_id
   alias {
@@ -87,7 +74,7 @@ resource "aws_route53_record" "frontend" {
   }
 }
 resource "aws_route53_record" "api" {
-  name    = "api.${local.subdomain}.${local.aws_zone}"
+  name    = "api.${local.aws_zone}"
   type    = "A"
   zone_id = data.aws_route53_zone.this.zone_id
   alias {
@@ -97,8 +84,8 @@ resource "aws_route53_record" "api" {
   }
 }
 resource "aws_acm_certificate" "this" {
-  domain_name               = "${local.subdomain}.${local.aws_zone}"
-  subject_alternative_names = ["api.${local.subdomain}.${local.aws_zone}"]
+  domain_name               = local.aws_zone
+  subject_alternative_names = ["api.${local.aws_zone}"]
   validation_method         = "DNS"
   lifecycle {
     create_before_destroy = true
