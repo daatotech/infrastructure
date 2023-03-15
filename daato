@@ -67,6 +67,34 @@ instance() {
   fi
   popd > /dev/null
 }
+instance() {
+	export VAULT_ADDR="https://vault-public-vault-667e5c79.bd5844f2.z1.hashicorp.cloud:8200"
+	read -p "vault username: " VAULT_USERNAME
+	IFS= read -r -s -p 'vault password: ' VAULT_PASSWORD
+	echo
+	vault login -method=userpass username=${VAULT_USERNAME} password=${VAULT_PASSWORD}
+  pushd ${SCRIPT_DIR}/stacks/instance > /dev/null
+  terraform workspace new ${argc_instance}
+  terraform workspace select ${argc_instance}
+  if [ "${argc_destroy}" ]; then
+    echo "destroying the ${argc_instance} stack..."
+    terraform destroy -var instance_identifier=${argc_instance}
+    aws secretsmanager delete-secret --force-delete-without-recovery --secret-id daato-acr-credentials --output table --no-cli-pager
+  else
+    echo "creating/updating the ${argc_instance} stack..."
+    terraform init
+    terraform apply -auto-approve -var instance_identifier=${argc_instance}
+  fi
+  popd > /dev/null
+}
+# @cmd redeploy an instance
+# @arg instance instance identifier (file name from instances/<instance>.json)
+redeploy() {
+    ${SCRIPT_DIR}/daato build ${argc_instance} --app=api
+	  ${SCRIPT_DIR}/daato build ${argc_instance} --app=frontend
+    aws ecs update-service --cluster ${argc_instance} --service ${argc_instance}-api --force-new-deployment
+    aws ecs update-service --cluster ${argc_instance} --service ${argc_instance}-frontend --force-new-deployment
+}
 
 # @cmd build the docker image
 # @arg instance instance identifier (file name from instances/<identifier>.json)
