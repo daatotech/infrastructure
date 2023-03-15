@@ -1,8 +1,7 @@
 {
-  "identifier": "porsche-pag-forward31",
+  "identifier": "daato-pag-forward31",
   "cloud": "aws",
-  "subdomain": "porsche-pag",
-  "domain": "forward31.com",
+  "domain": "daato-pag.forward31.com",
   "logo_url": "https://cdn.ui.porsche.com/porsche-design-system/marque/porsche-marque-trademark.medium.min.fff6e9b91481cc5b1fc6c9b62987ccaf@2x.webp",
   "core_api_identifier": "https://prod.core.daato.io",
   "core_api_url": "https://daato-core-prod.azurewebsites.net"
